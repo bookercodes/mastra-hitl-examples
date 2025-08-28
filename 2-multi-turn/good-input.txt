@@ -1,0 +1,21 @@
+Title: Unexpected ⁠undefined result when using TypeScript with an array method
+Question:
+I'm working with TypeScript and have encountered an unexpected issue when using the ⁠map method on an array. The goal is to create a new array where each element is doubled. However, I'm getting ⁠undefined values in the result instead of the expected doubled numbers.
+Here is the code:
+function doubleArrayElements(arr: number[]): number[] {
+  return arr.map((element) => {
+    element * 2;
+  });
+}
+
+const numbers = [1, 2, 3, 4];
+const doubledNumbers = doubleArrayElements(numbers);
+console.log(doubledNumbers);
+Expected Behavior:
+The ⁠doubledNumbers array should contain the doubled values of the input array:
+[2, 4, 6, 8]
+Actual Behavior:
+The ⁠doubledNumbers array contains ⁠undefined values:
+[undefined, undefined, undefined, undefined]
+What I've Tried:
+I've checked the function to ensure the ⁠map method is being used correctly, but I can't seem to find the issue. I'm not sure why the function returns ⁠undefined values instead of the doubled numbers. Any insights would be appreciated.
