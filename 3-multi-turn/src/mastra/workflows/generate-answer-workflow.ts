@@ -52,22 +52,7 @@ const askUserForApproval = createStep({
     return suspend({});
   },
 });
-
-const respond = createStep({
-  id: "respond",
-  inputSchema: z.object({
-    answer: z.string(),
-    query: z.string(),
-    approved: z.boolean(),
-  }),
-  outputSchema: z.object({}),
-  execute: async ({ inputData }) => {
-    console.log("sending answer", inputData.answer);
-    return {};
-  },
-});
-
-const generateAnswerWorkflow = createWorkflow({
+export const generateAnswerWorkflow = createWorkflow({
   id: "generateAnswerWorkflow",
   inputSchema: z.object({
     query: z.string(),
@@ -80,17 +65,4 @@ const generateAnswerWorkflow = createWorkflow({
 })
   .then(generateAnswer)
   .then(askUserForApproval)
-  .commit();
-
-export const customerSupportWorkflow = createWorkflow({
-  id: "customerSupportWorkflow",
-  inputSchema: z.object({
-    query: z.string(),
-  }),
-  outputSchema: z.object({
-    answer: z.string(),
-  }),
-})
-  .dountil(generateAnswerWorkflow, async ({ inputData }) => inputData.approved)
-  .then(respond)
   .commit();
