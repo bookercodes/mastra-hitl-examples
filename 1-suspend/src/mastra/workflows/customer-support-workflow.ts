@@ -29,24 +29,25 @@ const askUserForApproval = createStep({
   inputSchema: z.object({
     answer: z.string()
   }),
-  resumeSchema: z.object({
-    approved: z.boolean().optional()
-  }),
   outputSchema: z.object({
     answer: z.string()
   }),
-  execute: async ({ inputData, resumeData, suspend, bail }) => {
-    if  (!resumeData) {
+  resumeSchema: z.object({
+    approved: z.boolean().optional()
+  }),
+  execute: async ({ inputData, resumeData, suspend }) => {
+    if (!resumeData) {
+      // pause workflow and ask for resumeSchema
       return suspend({})
     }
 
-     if (!resumeData.approved) { 
-      return bail({
-        reason: 'not approved'
-      })
-     }
+    if (!resumeData.approved) {
+      // exit workflow with an error 
+      throw new Error('not approved')
+    } else {
+      return { answer: inputData.answer }
+    }
 
-    return { answer: inputData.answer }
   }
 })
 
@@ -54,7 +55,7 @@ const askUserForApproval = createStep({
 const respond = createStep({
   id: 'respond',
   inputSchema: z.object({
-     answer: z.string()
+    answer: z.string()
   }),
   outputSchema: z.object({}),
   execute: async ({ inputData }) => {
@@ -72,7 +73,7 @@ export const customerSupportWorkflow = createWorkflow({
     answer: z.string()
   })
 })
-.then(generateAnswer)
-.then(askUserForApproval)
-.then(respond)
-.commit()
+  .then(generateAnswer)
+  .then(askUserForApproval)
+  .then(respond)
+  .commit()

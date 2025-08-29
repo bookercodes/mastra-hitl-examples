@@ -58,8 +58,8 @@ const categorizeQuery = createStep({
 })
 
 
-const suspendAndWait = createStep({
-  id: 'suspendAndWait',
+const askUserForAnswer = createStep({
+  id: 'askUserForAnswer',
   inputSchema: z.object({
     query: z.string(),
     category: categorySchema
@@ -77,20 +77,6 @@ const suspendAndWait = createStep({
     return { answer: resumeData.answer }
   }
 })
-
-const askUserForAnswer = createWorkflow({
-  id: 'askUserForAnswer',
-  inputSchema: z.object({
-    query: z.string(),
-    category: categorySchema
-  }),
-  outputSchema: z.object({
-    answer: z.string()
-  })
-})
-  .then(suspendAndWait)
-  .commit()
-
 
 const respond = createStep({
   id: 'respond',
