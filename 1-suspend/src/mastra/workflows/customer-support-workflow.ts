@@ -11,12 +11,7 @@ const generateAnswer = createStep({
     answer: z.string(),
   }),
   execute: async ({ inputData }) => {
-    const result = await customerSupportAgent.generate([
-      {
-        role: "user",
-        content: `Answer the following customer query: ${inputData.query}`,
-      },
-    ])
+    const result = await customerSupportAgent.generate(`Answer the following customer query: ${inputData.query}`)
 
     return {
       answer: result.text,
@@ -69,11 +64,9 @@ export const customerSupportWorkflow = createWorkflow({
   inputSchema: z.object({
     query: z.string(),
   }),
-  outputSchema: z.object({
-    answer: z.string(),
-  }),
+  outputSchema: z.object({ }),
 })
   .then(generateAnswer)
-  .then(askUserForApproval)
+  // .then(askUserForApproval)
   .then(respond)
   .commit()
