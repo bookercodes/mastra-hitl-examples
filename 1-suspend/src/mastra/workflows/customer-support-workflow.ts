@@ -59,7 +59,7 @@ const respond = createStep({
   }),
   outputSchema: z.object({}),
   execute: async ({ inputData }) => {
-    console.log("sending answer", inputData.answer)
+    console.log("pretending to respond with answer", inputData.answer)
     return {}
   },
 })

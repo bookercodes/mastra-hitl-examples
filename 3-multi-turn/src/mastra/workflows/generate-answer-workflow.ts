@@ -42,14 +42,14 @@ const askUserForApproval = createStep({
     approved: z.boolean().optional(),
   }),
   execute: async ({ inputData, resumeData, suspend }) => {
-    if (resumeData) {
-      return {
-        answer: inputData.answer,
-        query: inputData.query,
-        approved: resumeData.approved,
-      }
+    if (!resumeData) {
+      return suspend({})
+    } 
+    return {
+      answer: inputData.answer,
+      query: inputData.query,
+      approved: resumeData.approved,
     }
-    return suspend({})
   },
 })
 export const generateAnswerWorkflow = createWorkflow({
