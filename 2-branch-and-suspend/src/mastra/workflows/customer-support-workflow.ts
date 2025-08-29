@@ -15,15 +15,11 @@ const generateAnswer = createStep({
     answer: z.string(),
   }),
   execute: async ({ inputData }) => {
-    const result = await customerSupportAgent.generate([
-      {
-        role: "user",
-        content: `Answer the following customer query: ${inputData.query}`,
-      },
-    ])
+    const { text } = 
+      await customerSupportAgent.generate(`Answer the following customer query: ${inputData.query}`)
 
     return {
-      answer: result.text,
+      answer: text,
     }
   },
 })
@@ -41,6 +37,7 @@ const categorizeQuery = createStep({
     const result = await queryEvaluatorAgent.generate(
       `Evaluate the following customer query: ${inputData.query}`,
       {
+        // define expected output format
         output: z.object({
           category: categorySchema,
         }),
@@ -48,8 +45,8 @@ const categorizeQuery = createStep({
     )
 
     return {
-      category: result.object.category,
       query: inputData.query,
+      category: result.object.category,
     }
   },
 })
@@ -84,7 +81,7 @@ const respond = createStep({
   execute: async ({ inputData }) => {
     const answer =
       inputData.generateAnswer?.answer || inputData.askUserForAnswer?.answer
-    console.log("sending answer", answer)
+    console.log("pretending to respond with", answer)
     return {}
   },
 })
@@ -100,14 +97,8 @@ export const customerSupportWorkflow = createWorkflow({
 })
   .then(categorizeQuery)
   .branch([
-    [
-      async ({ inputData: { category } }) => category === "GENERAL",
-      generateAnswer,
-    ],
-    [
-      async ({ inputData: { category } }) => category === "ORDER INQUIRY",
-      askUserForAnswer,
-    ],
+    [ async ({ inputData: { category } }) => category === "GENERAL", generateAnswer ],
+    [ async ({ inputData: { category } }) => category === "ORDER INQUIRY", askUserForAnswer ],
   ])
   .then(respond)
   .commit()
