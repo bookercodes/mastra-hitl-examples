@@ -1,6 +1,6 @@
-import { createStep, createWorkflow } from "@mastra/core";
-import z from "zod";
-import { customerSupportAgent } from "../agents/customer-support-agent";
+import { createStep, createWorkflow } from "@mastra/core"
+import z from "zod"
+import { customerSupportAgent } from "../agents/customer-support-agent"
 
 const generateAnswer = createStep({
   id: "generateAnswer",
@@ -18,14 +18,14 @@ const generateAnswer = createStep({
         temperature: 1.5,
         topP: 0.9,
       },
-    );
+    )
 
     return {
       query: inputData.query,
       answer: text,
-    };
+    }
   },
-});
+})
 
 const askUserForApproval = createStep({
   id: "askUserForApproval",
@@ -47,11 +47,11 @@ const askUserForApproval = createStep({
         answer: inputData.answer,
         query: inputData.query,
         approved: resumeData.approved,
-      };
+      }
     }
-    return suspend({});
+    return suspend({})
   },
-});
+})
 export const generateAnswerWorkflow = createWorkflow({
   id: "generateAnswerWorkflow",
   inputSchema: z.object({
@@ -65,4 +65,4 @@ export const generateAnswerWorkflow = createWorkflow({
 })
   .then(generateAnswer)
   .then(askUserForApproval)
-  .commit();
+  .commit()

@@ -1,6 +1,6 @@
-import { createStep, createWorkflow } from "@mastra/core";
-import z from "zod";
-import { generateAnswerWorkflow } from "./generate-answer-workflow";
+import { createStep, createWorkflow } from "@mastra/core"
+import z from "zod"
+import { generateAnswerWorkflow } from "./generate-answer-workflow"
 
 const respond = createStep({
   id: "respond",
@@ -11,10 +11,10 @@ const respond = createStep({
   }),
   outputSchema: z.object({}),
   execute: async ({ inputData }) => {
-    console.log("sending answer", inputData.answer);
-    return {};
+    console.log("sending answer", inputData.answer)
+    return {}
   },
-});
+})
 
 export const customerSupportWorkflow = createWorkflow({
   id: "customerSupportWorkflow",
@@ -27,4 +27,4 @@ export const customerSupportWorkflow = createWorkflow({
 })
   .dountil(generateAnswerWorkflow, async ({ inputData }) => inputData.approved)
   .then(respond)
-  .commit();
+  .commit()

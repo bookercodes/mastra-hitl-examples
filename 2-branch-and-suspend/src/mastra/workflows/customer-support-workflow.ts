@@ -1,15 +1,15 @@
-import { createStep, createWorkflow } from "@mastra/core";
-import z from "zod";
-import { customerSupportAgent } from "../agents/customer-support-agent";
-import { queryEvaluatorAgent } from "../agents/query-evaluator-agent";
+import { createStep, createWorkflow } from "@mastra/core"
+import z from "zod"
+import { customerSupportAgent } from "../agents/customer-support-agent"
+import { queryEvaluatorAgent } from "../agents/query-evaluator-agent"
 
-const categorySchema = z.enum(['GENERAL', 'ORDER INQUIRY']);
+const categorySchema = z.enum(["GENERAL", "ORDER INQUIRY"])
 
 const generateAnswer = createStep({
-  id: 'generateAnswer',
+  id: "generateAnswer",
   inputSchema: z.object({
     query: z.string(),
-    category: categorySchema
+    category: categorySchema,
   }),
   outputSchema: z.object({
     answer: z.string(),
@@ -17,94 +17,97 @@ const generateAnswer = createStep({
   execute: async ({ inputData }) => {
     const result = await customerSupportAgent.generate([
       {
-        role: 'user',
-        content: `Answer the following customer query: ${inputData.query}`
-      }
+        role: "user",
+        content: `Answer the following customer query: ${inputData.query}`,
+      },
     ])
 
     return {
-      answer: result.text
+      answer: result.text,
     }
-  }
+  },
 })
 
 const categorizeQuery = createStep({
-  id: 'categorizeQuery',
+  id: "categorizeQuery",
   inputSchema: z.object({
     query: z.string(),
   }),
   outputSchema: z.object({
     query: z.string(),
-    category: categorySchema
+    category: categorySchema,
   }),
   execute: async ({ inputData }) => {
-
-    const result = await queryEvaluatorAgent.generate([
+    const result = await queryEvaluatorAgent.generate(
+      `Evaluate the following customer query: ${inputData.query}`,
       {
-        role: 'user',
-        content: `Evaluate the following customer query: ${inputData.query}`
-      }
-    ], {
-      output: z.object({
-        category: categorySchema
-      })
-    })
+        output: z.object({
+          category: categorySchema,
+        }),
+      },
+    )
 
     return {
       category: result.object.category,
-      query: inputData.query
+      query: inputData.query,
     }
-  }
+  },
 })
 
-
 const askUserForAnswer = createStep({
-  id: 'askUserForAnswer',
+  id: "askUserForAnswer",
   inputSchema: z.object({
     query: z.string(),
-    category: categorySchema
+    category: categorySchema,
   }),
   resumeSchema: z.object({
-    answer: z.string()
+    answer: z.string(),
   }),
   outputSchema: z.object({
-    answer: z.string()
+    answer: z.string(),
   }),
   execute: async ({ suspend, resumeData }) => {
     if (!resumeData) {
       return suspend({})
     }
     return { answer: resumeData.answer }
-  }
+  },
 })
 
 const respond = createStep({
-  id: 'respond',
+  id: "respond",
   inputSchema: z.object({
     generateAnswer: z.object({ answer: z.string() }),
     askUserForAnswer: z.object({ answer: z.string() }),
   }),
   outputSchema: z.object({}),
   execute: async ({ inputData }) => {
-    const answer = inputData.generateAnswer?.answer || inputData.askUserForAnswer?.answer
+    const answer =
+      inputData.generateAnswer?.answer || inputData.askUserForAnswer?.answer
     console.log("sending answer", answer)
     return {}
-  }
+  },
 })
 
 export const customerSupportWorkflow = createWorkflow({
-  id: 'customerSupportWorkflow',
+  id: "customerSupportWorkflow",
   inputSchema: z.object({
     query: z.string(),
   }),
   outputSchema: z.object({
-    answer: z.string()
-  })
+    answer: z.string(),
+  }),
 })
   .then(categorizeQuery)
   .branch([
-    [async ({ inputData: { category } }) => category === 'GENERAL', generateAnswer],
-    [async ({ inputData: { category } }) => category === 'ORDER INQUIRY', askUserForAnswer]
+    [
+      async ({ inputData: { category } }) => category === "GENERAL",
+      generateAnswer,
+    ],
+    [
+      async ({ inputData: { category } }) => category === "ORDER INQUIRY",
+      askUserForAnswer,
+    ],
   ])
   .then(respond)
   .commit()

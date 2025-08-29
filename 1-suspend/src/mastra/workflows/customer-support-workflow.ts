@@ -1,11 +1,11 @@
-import { createStep, createWorkflow } from "@mastra/core";
-import z from "zod";
-import { customerSupportAgent } from "../agents/customer-support-agent";
+import { createStep, createWorkflow } from "@mastra/core"
+import z from "zod"
+import { customerSupportAgent } from "../agents/customer-support-agent"
 
 const generateAnswer = createStep({
-  id: 'generateAnswer',
+  id: "generateAnswer",
   inputSchema: z.object({
-    query: z.string()
+    query: z.string(),
   }),
   outputSchema: z.object({
     answer: z.string(),
@@ -13,65 +13,65 @@ const generateAnswer = createStep({
   execute: async ({ inputData }) => {
     const result = await customerSupportAgent.generate([
       {
-        role: 'user',
-        content: `Answer the following customer query: ${inputData.query}`
-      }
+        role: "user",
+        content: `Answer the following customer query: ${inputData.query}`,
+      },
     ])
 
     return {
-      answer: result.text
+      answer: result.text,
     }
-  }
+  },
 })
 
 const askUserForApproval = createStep({
-  id: 'askUserForAnswer',
+  id: "askUserForAnswer",
   inputSchema: z.object({
-    answer: z.string()
+    answer: z.string(),
   }),
   outputSchema: z.object({
-    answer: z.string()
+    answer: z.string(),
   }),
   resumeSchema: z.object({
-    approved: z.boolean().optional()
+    approved: z.boolean().optional(),
   }),
   execute: async ({ inputData, resumeData, suspend }) => {
+    // if no resumeData, step is executing from the beginning (not being resumed)!
     if (!resumeData) {
       // pause workflow and ask for resumeSchema
       return suspend({})
     }
 
+    // else the step is resuming execution
     if (!resumeData.approved) {
-      // exit workflow with an error 
-      throw new Error('not approved')
-    } else {
-      return { answer: inputData.answer }
+      // exit workflow with an error
+      throw new Error("not approved")
     }
 
-  }
+    return { answer: inputData.answer }
+  },
 })
 
-
 const respond = createStep({
-  id: 'respond',
+  id: "respond",
   inputSchema: z.object({
-    answer: z.string()
+    answer: z.string(),
   }),
   outputSchema: z.object({}),
   execute: async ({ inputData }) => {
     console.log("sending answer", inputData.answer)
     return {}
-  }
+  },
 })
 
 export const customerSupportWorkflow = createWorkflow({
-  id: 'customerSupportWorkflow',
+  id: "customerSupportWorkflow",
   inputSchema: z.object({
     query: z.string(),
   }),
   outputSchema: z.object({
-    answer: z.string()
-  })
+    answer: z.string(),
+  }),
 })
   .then(generateAnswer)
   .then(askUserForApproval)
