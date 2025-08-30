@@ -65,6 +65,7 @@ const askUserForAnswer = createStep({
   }),
   execute: async ({ suspend, resumeData }) => {
     if (!resumeData) {
+      // execute function returns/finishes running
       return suspend({})
     }
     return { answer: resumeData.answer }
@@ -91,14 +92,14 @@ export const customerSupportWorkflow = createWorkflow({
   inputSchema: z.object({
     query: z.string(),
   }),
-  outputSchema: z.object({
-    answer: z.string(),
-  }),
+  outputSchema: z.object({ }),
 })
   .then(categorizeQuery)
   .branch([
+    // only one runs
     [ async ({ inputData: { category } }) => category === "GENERAL", generateAnswer ],
     [ async ({ inputData: { category } }) => category === "ORDER INQUIRY", askUserForAnswer ],
   ])
+  // ^ either branch returns a message, so respond can process their outputSchema
   .then(respond)
   .commit()

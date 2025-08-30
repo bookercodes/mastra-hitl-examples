@@ -30,7 +30,7 @@ const askUserForApproval = createStep({
   resumeSchema: z.object({
     approved: z.boolean().optional(),
   }),
-  execute: async ({ inputData, resumeData, suspend }) => {
+  execute: async ({ bail, inputData, resumeData, suspend }) => {
     // if no resumeData, step is executing from the beginning (not being resumed)!
     if (!resumeData) {
       // pause workflow and ask for resumeSchema
@@ -39,8 +39,11 @@ const askUserForApproval = createStep({
 
     // else the step is resuming execution
     if (!resumeData.approved) {
-      // exit workflow with an error
-      throw new Error("not approved")
+      // exit workflow with an error (do not run next step)
+      // throw new Error("not approved")
+
+      // end workflow execution without an err
+       return bail({})
     }
 
     return { answer: inputData.answer }
@@ -67,6 +70,6 @@ export const customerSupportWorkflow = createWorkflow({
   outputSchema: z.object({ }),
 })
   .then(generateAnswer)
-  // .then(askUserForApproval)
+  .then(askUserForApproval)
   .then(respond)
   .commit()

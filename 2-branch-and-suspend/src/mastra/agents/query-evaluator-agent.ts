@@ -7,6 +7,6 @@ export const queryEvaluatorAgent = new Agent({
   Determine whether it is a general inquiry that can be answered using model knowledge or an order inquiry that requires human intervention to look up specific information.
   For each question, output the following:
 
-	Category: Indicate 'General Inquiry' or 'Order Inquiry.'`,
+	Category: Indicate 'General' or 'Order Inquiry'.`,
   model: openai('gpt-4o-mini')
 });
