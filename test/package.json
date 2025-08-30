@@ -1,0 +1,11 @@
+{
+  "name": "tweet-generator",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --parallel dev",
+    "build": "pnpm --recursive build"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.1"
+  }
+}
