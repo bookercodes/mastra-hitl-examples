@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { mastraClient } from "./lib/mastra";
+import { mastraClient } from './lib/mastra'
 
 interface Message {
   text: string
-  author: 'user' | 'assistant'
+  author: 'USER' | 'ASSISTANT'
 }
 
 function App() {
@@ -13,47 +13,50 @@ function App() {
   const [gameWon, setGameWon] = useState(false)
   const hasInitialized = useRef(false)
 
-  const addMessage = (text: string, author: 'user' | 'assistant') => {
-    setMessages(prevMessages => [...prevMessages, { text, author }])
+  const addMessage = (text: string, author: 'USER' | 'ASSISTANT') => {
+    setMessages((prevMessages) => [...prevMessages, { text, author }])
   }
 
   useEffect(() => {
     if (hasInitialized.current) return
-    hasInitialized.current = true;
+    hasInitialized.current = true
 
-    (async () => {
-      const gameWorkflow = mastraClient.getWorkflow("gameWorkflow")
+    ;(async () => {
+      const gameWorkflow = mastraClient.getWorkflow('gameWorkflow')
       const { runId } = await gameWorkflow.createRunAsync()
       const result = await gameWorkflow.startAsync({
-        runId: runId,
-        inputData: {}
+        runId,
+        inputData: {},
       })
 
       setRunId(runId)
-      addMessage(result.steps.generateInitialGameState.output.response, 'assistant')
+      addMessage(
+        result.steps.generateInitialGameState.output.response,
+        'ASSISTANT',
+      )
     })()
   }, [])
 
   const handleSubmitMessage = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    addMessage(inputMessage, 'user')
+    addMessage(inputMessage, 'USER')
     setInputMessage('')
 
-    const gameWorkflow = mastraClient.getWorkflow("gameWorkflow")
+    const gameWorkflow = mastraClient.getWorkflow('gameWorkflow')
     const result = await gameWorkflow.resumeAsync({
       runId,
-      step: "takeUserTurn",
+      step: 'takeUserTurn',
       resumeData: {
-        userGuess: inputMessage
-      }
+        userGuess: inputMessage,
+      },
     })
 
-    console.log("result", result)
+    console.log('result', result)
 
-    if (result.status === "suspended") {
-      addMessage(result.steps.takeUserTurn.payload.response, 'assistant')
-    } else if (result.status === "success") {
-      addMessage(result.steps.endGame.output.response, 'assistant')
+    if (result.status === 'suspended') {
+      addMessage(result.steps.takeUserTurn.payload.response, 'ASSISTANT')
+    } else if (result.status === 'success') {
+      addMessage(result.steps.endGame.output.response, 'ASSISTANT')
       setGameWon(true)
     }
   }
@@ -64,11 +67,15 @@ function App() {
         <p>Hello</p>
         <div>
           {messages.map((message, index) => (
-            <p key={index} style={{
-              color: message.author === 'user' ? 'blue' : 'green',
-              fontWeight: message.author === 'user' ? 'bold' : 'normal'
-            }}>
-              {message.author === 'user' ? 'You: ' : 'Assistant: '}{message.text}
+            <p
+              key={index}
+              style={{
+                color: message.author === 'USER' ? 'blue' : 'green',
+                fontWeight: message.author === 'USER' ? 'bold' : 'normal',
+              }}
+            >
+              {message.author === 'USER' ? 'You: ' : 'Assistant: '}
+              {message.text}
             </p>
           ))}
         </div>
@@ -86,11 +93,8 @@ function App() {
         )}
 
         {gameWon && (
-          <button onClick={() => window.location.reload()}>
-            Play Again
-          </button>
+          <button onClick={() => window.location.reload()}>Play Again</button>
         )}
-
       </div>
     </>
   )
