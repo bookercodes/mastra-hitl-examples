@@ -3,7 +3,7 @@ import { mastraClient } from './lib/mastra'
 
 interface Message {
   text: string
-  author: 'USER' | 'ASSISTANT'
+  author: 'user' | 'assistant'
 }
 
 function App() {
@@ -13,7 +13,7 @@ function App() {
   const [gameWon, setGameWon] = useState(false)
   const hasInitialized = useRef(false)
 
-  const addMessage = (text: string, author: 'USER' | 'ASSISTANT') => {
+  const addMessage = (text: string, author: 'user' | 'assistant') => {
     setMessages((prevMessages) => [...prevMessages, { text, author }])
   }
 
@@ -32,14 +32,14 @@ function App() {
       setRunId(runId)
       addMessage(
         result.steps.generateInitialGameState.output.response,
-        'ASSISTANT',
+        'assistant',
       )
     })()
   }, [])
 
   const handleSubmitMessage = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    addMessage(inputMessage, 'USER')
+    addMessage(inputMessage, 'user')
     setInputMessage('')
 
     const gameWorkflow = mastraClient.getWorkflow('gameWorkflow')
@@ -54,9 +54,9 @@ function App() {
     console.log('result', result)
 
     if (result.status === 'suspended') {
-      addMessage(result.steps.takeUserTurn.payload.response, 'ASSISTANT')
+      addMessage(result.steps.takeUserTurn.payload.response, 'assistant')
     } else if (result.status === 'success') {
-      addMessage(result.steps.endGame.output.response, 'ASSISTANT')
+      addMessage(result.steps.endGame.output.response, 'assistant')
       setGameWon(true)
     }
   }
@@ -70,11 +70,11 @@ function App() {
             <p
               key={index}
               style={{
-                color: message.author === 'USER' ? 'blue' : 'green',
-                fontWeight: message.author === 'USER' ? 'bold' : 'normal',
+                color: message.author === 'user' ? 'blue' : 'green',
+                fontWeight: message.author === 'user' ? 'bold' : 'normal',
               }}
             >
-              {message.author === 'USER' ? 'You: ' : 'Assistant: '}
+              {message.author === 'user' ? 'You: ' : 'Assistant: '}
               {message.text}
             </p>
           ))}
